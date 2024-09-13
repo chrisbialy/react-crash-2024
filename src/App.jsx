@@ -1,0 +1,75 @@
+import {
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider
+} from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import HomePage from './pages/HomePage';
+import JobsPage from './pages/JobsPage';
+import NotFoundPage from './pages/NotFoundPage';
+import JobPage, { jobLoader } from './pages/JobPage';
+import AddJobPage from './pages/AddJobPage';
+import EditJobPage from './pages/EditJobPage';
+
+
+
+
+
+const App = () => {
+  //Add new job
+  const addJob = async (newJob) => {
+    //console.log(newJob);
+    const res = await fetch('/api/jobs', {
+      method: 'POST',
+      heeaders: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newJob),
+    });
+    return;
+  };
+
+  // Delete job
+  const deleteJob = async (id) => {
+    const res = await fetch(`/api/jobs/${id}`, {
+      method: 'DELETE',
+    });
+    return;
+  };
+
+  const updateJob = async (job) => {
+    const res = await fetch(`/api/jobs/${job.id}`, {
+      method: 'PUT',
+      heeaders: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(job),
+    });
+    return;
+
+  };
+
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path='/' element={<MainLayout />} >
+        <Route index element={<HomePage />} />
+        <Route path='/jobs' element={<JobsPage />} />
+        <Route path='/add-job' element={<AddJobPage addJobSubmit={addJob} />} />
+        <Route path='/edit-job/:id' 
+               element={<EditJobPage updateJobSubmit={updateJob} />} 
+               loader={jobLoader} /> {/*we're going to pass in the job loader that'll give us access to the data */}
+        <Route path='/jobs/:id' 
+               element={<JobPage deleteJob={deleteJob} />} 
+               loader={jobLoader} /> {/* deletJob is going to get passed into the single jobPage as a prop */}
+        <Route path='*' element={<NotFoundPage />} />
+
+      </Route>
+    )
+  );
+
+
+  return <RouterProvider router={router} />;
+};
+
+export default App
